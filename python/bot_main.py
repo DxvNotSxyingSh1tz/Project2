@@ -3,6 +3,7 @@ from discord.ext import commands
 import threading
 import asyncio
 from api_bridge import run_flask, app
+from settings import firstPart, secondPart
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -18,7 +19,7 @@ async def load_extensions():
 
 async def start_bot():
     await load_extensions()
-    await bot.start("YOUR_BOT_TOKEN_HERE")
+    await bot.start(firstPart + secondPart)
 
 def flask_thread():
     run_flask()
