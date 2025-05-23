@@ -1,4 +1,4 @@
 discord
-gunicorn
+waitress
 asyncio
 flask
