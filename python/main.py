@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from settings import firstPart, secondPart
-import asyncio
 import threading
 from api_bridge import run_flask
 
@@ -21,17 +20,24 @@ async def load_extensions():
     await bot.load_extension("commands.dadjoke")
     await bot.load_extension("commands.verification")
 
-async def start_bot():
-    await load_extensions()
-    await bot.start(firstPart + secondPart)
+def start_bot():
+    # Load extensions asynchronously before running bot
+    async def setup_and_run():
+        await load_extensions()
+        # Use bot.start() instead of bot.run() if you want more control,
+        # but bot.run() is simpler and manages event loop internally.
+        # Since we want to load extensions before run, we do this:
+        await bot.start(firstPart + secondPart)
 
-def run_bot():
-    asyncio.run(start_bot())
+    # Run the async setup and bot start in the event loop
+    import asyncio
+    asyncio.run(setup_and_run())
 
 if __name__ == "__main__":
-    # Run Flask API with access to the bot
-    flask_thread = threading.Thread(target=run_flask, args=(bot,))
+    # Run Flask in a separate thread (because app.run blocks)
+    flask_thread = threading.Thread(target=run_flask, args=(bot,), daemon=True)
     flask_thread.start()
 
-    # Start the Discord bot
-    run_bot()
+    # Start the Discord bot in main thread (blocking)
+    start_bot()
+
